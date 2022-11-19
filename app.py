@@ -2,20 +2,19 @@
 Simple app to upload an image via a web form 
 and view the inference results on the image in the browser.
 """
+from query import send
+import threading
+from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, request, redirect, Response
+import torch
 import io
 from PIL import Image
 import cv2
 import numpy as np
 from time import sleep
 
-import torch
-from flask import Flask, render_template, request, redirect, Response
-from flask_socketio import SocketIO, emit
-import threading
-from query import send
-
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*', async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 # Load Pre-trained Model
 model = torch.hub.load(
@@ -155,7 +154,7 @@ alarmflag = False
 
 
 @socketio.on('alarm')
-def alarm():
+def alarm(dummy):
     global alarmflag
     if alarmflag == False:
         print('alarm received, loop start')
