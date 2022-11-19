@@ -15,7 +15,7 @@ import threading
 from query import send
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app, cors_allowed_origins='*', async_mode='threading')
 
 # Load Pre-trained Model
 model = torch.hub.load(
@@ -43,6 +43,9 @@ model.iou = 0.45  # NMS IoU threshold (0-1)
 # cap = cv2.VideoCapture(0)
 
 # pi camera
+# 오류 발생 시 sudo service nvargus-daemon restart
+
+
 def gstreamer_pipeline(
     sensor_id=0,
     capture_width=1920,
@@ -69,7 +72,9 @@ def gstreamer_pipeline(
             display_height,
         )
     )
-cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+
+
+cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
 ''' 멀티 스레드로 object detection(yolo) 돌리고 http 요청 들어오면 화면 송출 '''
 
@@ -102,8 +107,7 @@ def detect():
                 lst.append(i)
             print(lst)
         else:  # reload when no frame
-            cap = cv2.VideoCapture(
-                "rtsp://dogcam:blueberry19@errong.iptimecam.com:21040/stream_ch00_0")
+            cap = cap
             sleep(3)
 
 
@@ -130,9 +134,7 @@ def index():
 @app.route('/video')
 def video():
     """Video streaming route. Put this in the src attribute of an img tag."""
-
-    return Response(gen(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @socketio.on('connect')
