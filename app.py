@@ -14,7 +14,9 @@ import numpy as np
 from time import sleep
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+
+socket = Flask(__name__)
+socketio = SocketIO(socket, cors_allowed_origins='*')
 
 # Load Pre-trained Model
 model = torch.hub.load(
@@ -150,17 +152,16 @@ def emit():
         socketio.sleep(2)
 
 
-alarmflag = False
+alarmThread = None
 
 
 @socketio.on('alarm')
 def alarm(dummy):
-    global alarmflag
-    if alarmflag == False:
+    global alarmThread
+    if alarmThread is None:
         print('alarm received, loop start')
-        thread = socketio.start_background_task(target=emit)
-        thread.start()
-        alarmflag = True
+        alarmThread = socketio.start_background_task(target=emit)
+        alarmThread.start()
 
     # while True:
     #     socketio.emit('alarm', 'hello')
@@ -172,9 +173,19 @@ def disconnect():
     print('disconnected!')
 
 
-if __name__ == "__main__":
-    t1 = threading.Thread(target=detect)
-    t1.start()
+def runapp():
+    app.run(host='0.0.0.0', port=5000)
 
-    # debug=True causes Restarting with stat
-    socketio.run(app, host='0.0.0.0', port=5000)
+
+def runsocketio():
+    socketio.run(socket, host='0.0.0.0', port=5001, use_reloader=False)
+
+
+if __name__ == "__main__":
+    detect_thread = threading.Thread(target=detect)
+    detect_thread.start()
+
+    app_thread = threading.Thread(target=runapp)
+    socketio_thread = threading.Thread(target=runsocketio)
+    app_thread.start()
+    socketio_thread.start()
