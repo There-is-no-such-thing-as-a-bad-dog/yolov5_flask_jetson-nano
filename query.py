@@ -1,14 +1,49 @@
 import pymysql
+import json
+import collections
+
+''' select로 가장 최근 것을 가져와서 액션이 같다면 end time update, 다르다면 insert '''
 
 
-def send(action):
-    conn = pymysql.connect(host='localhost', user='test',
-                           password='1234', db='dog')
+def update(action):
+    conn = pymysql.connect(host='localhost', user='dog',
+                           password='dog', db='dog')
     cursor = conn.cursor()
 
-    sql = "insert into behavior (action) values (%s)"
-    cursor.execute(sql, (action))
+    sql = "select * from behavior order by end desc limit 1;"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+
+    if len(result) == 0:
+        sql = "insert into behavior values (%s,NOW(),NOW())"
+        cursor.execute(sql, (action))
+    else:
+        if result[0][0] == action:
+            sql = "update behavior set end=NOW() where action=%s and start=%s"
+            cursor.execute(sql, (action, result[0][1]))
+        else:
+            sql = "insert into behavior values (%s,NOW(),NOW())"
+            cursor.execute(sql, (action))
 
     conn.commit()
     conn.close()
-    # print(action + "has inserted successful")
+
+
+''' 데이터 시각화를 위한 쿼리문 '''
+
+
+def select():
+    conn = pymysql.connect(host='localhost', user='dog',
+                           password='dog', db='dog')
+    cursor = conn.cursor()
+
+    sql = "select action, sum(end-start+1) from behavior group by action"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    data = []
+    for row in rows:
+        tmp = collections.OrderedDict()
+        tmp['action'] = row[0]
+        tmp['time'] = int(row[1])
+        data.append(tmp)
+    return json.dumps(data)

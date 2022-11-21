@@ -2,7 +2,7 @@
 Simple app to upload an image via a web form 
 and view the inference results on the image in the browser.
 """
-from query import send
+from query import update, select
 import threading
 from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, request, redirect, Response
@@ -104,7 +104,7 @@ def detect():
             lst = []
             df = results.pandas().xyxy[0]
             for i in df['name']:
-                # send(i)
+                update(i)
                 lst.append(i)
             print(lst)
         else:  # reload when no frame
@@ -136,6 +136,11 @@ def index():
 def video():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/database')
+def show():
+    return select()
 
 
 @socketio.on('connect')
