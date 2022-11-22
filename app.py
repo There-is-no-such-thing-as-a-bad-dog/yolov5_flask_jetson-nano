@@ -41,7 +41,7 @@ model.iou = 0.45  # NMS IoU threshold (0-1)
 #     "rtsp://brighten:brighten0701@192.168.0.44:554/stream_ch00_0")
 
 # webcam
-# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 # pi camera
 # 오류 발생 시 sudo service nvargus-daemon restart
@@ -74,8 +74,7 @@ def gstreamer_pipeline(
         )
     )
 
-
-cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
 ''' 멀티 스레드로 object detection(yolo) 돌리고 http 요청 들어오면 화면 송출 '''
 
