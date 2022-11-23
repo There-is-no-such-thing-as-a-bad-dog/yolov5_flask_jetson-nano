@@ -3,7 +3,8 @@ import pymysql
 import json
 import collections
 
-''' select로 가장 최근 것을 가져와서 액션이 같다면 end time update, 다르다면 insert '''
+''' select로 가장 최근 것을 가져와서 액션이 같다면 end time update,
+다르다면 insert (이상행동이라면 fcm 푸시도 함께) '''
 
 abnormal_behavior = ['eat', 'bark', 'walk']
 
