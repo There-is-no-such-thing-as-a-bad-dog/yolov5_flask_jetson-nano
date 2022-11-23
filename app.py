@@ -3,6 +3,7 @@ Simple app to upload an image via a web form
 and view the inference results on the image in the browser.
 """
 from query import update, select
+from fcm import fcm_send
 import threading
 from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, request, redirect, Response
@@ -74,6 +75,7 @@ def gstreamer_pipeline(
         )
     )
 
+
 # cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
 ''' 멀티 스레드로 object detection(yolo) 돌리고 http 요청 들어오면 화면 송출 '''
@@ -105,6 +107,8 @@ def detect():
             for i in df['name']:
                 update(i)
                 lst.append(i)
+                if i == 'person':
+                    fcm_send(i)
             print(lst)
         else:  # reload when no frame
             cap = cap
