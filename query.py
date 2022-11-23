@@ -1,8 +1,11 @@
+from fcm import fcm_send
 import pymysql
 import json
 import collections
 
 ''' select로 가장 최근 것을 가져와서 액션이 같다면 end time update, 다르다면 insert '''
+
+abnormal_behavior = ['eat', 'bark', 'walk']
 
 
 def update(action):
@@ -22,6 +25,8 @@ def update(action):
             sql = "update behavior set end=NOW() where action=%s and start=%s"
             cursor.execute(sql, (action, result[0][1]))
         else:
+            if action in abnormal_behavior:
+                fcm_send(action)
             sql = "insert into behavior values (%s,NOW(),NOW())"
             cursor.execute(sql, (action))
 

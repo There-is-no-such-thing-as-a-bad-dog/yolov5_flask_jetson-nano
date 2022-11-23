@@ -107,8 +107,6 @@ def detect():
             for i in df['name']:
                 update(i)
                 lst.append(i)
-                if i == 'person':
-                    fcm_send(i)
             print(lst)
         else:  # reload when no frame
             cap = cap
