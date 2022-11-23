@@ -3,10 +3,8 @@ Simple app to upload an image via a web form
 and view the inference results on the image in the browser.
 """
 from query import update, select
-from fcm import fcm_send
 import threading
-from flask_socketio import SocketIO, emit
-from flask import Flask, render_template, request, redirect, Response
+from flask import Flask, render_template, Response
 import torch
 import io
 from PIL import Image
@@ -15,9 +13,6 @@ import numpy as np
 from time import sleep
 
 app = Flask(__name__)
-
-socket = Flask(__name__)
-socketio = SocketIO(socket, cors_allowed_origins='*')
 
 # Load Pre-trained Model
 model = torch.hub.load(
@@ -144,54 +139,8 @@ def show():
     return select()
 
 
-@socketio.on('connect')
-def connect():
-    print("connected")
-    socketio.emit('connect', "connected!")
-    # socketio.start_background_task(target=emit)
-
-
-def emit():
-    while True:
-        socketio.emit('alarm', lst)
-        print(str(lst) + " sended")
-        socketio.sleep(2)
-
-
-alarmThread = None
-
-
-@socketio.on('alarm')
-def alarm(dummy):
-    global alarmThread
-    if alarmThread is None:
-        print('alarm received, loop start')
-        alarmThread = socketio.start_background_task(target=emit)
-        alarmThread.start()
-
-    # while True:
-    #     socketio.emit('alarm', 'hello')
-    #     socketio.sleep(2)
-
-
-@socketio.on('disconnect')
-def disconnect():
-    print('disconnected!')
-
-
-def runapp():
-    app.run(host='0.0.0.0', port=5000)
-
-
-def runsocketio():
-    socketio.run(socket, host='0.0.0.0', port=5001, use_reloader=False)
-
-
 if __name__ == "__main__":
     detect_thread = threading.Thread(target=detect)
     detect_thread.start()
 
-    app_thread = threading.Thread(target=runapp)
-    socketio_thread = threading.Thread(target=runsocketio)
-    app_thread.start()
-    socketio_thread.start()
+    app.run(host='0.0.0.0', port=5000)
