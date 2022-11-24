@@ -15,18 +15,21 @@ from time import sleep
 app = Flask(__name__)
 
 # Load Pre-trained Model
-model = torch.hub.load(
-    "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=True
-)  # .autoshape()  # force_reload = recache latest code
+# model = torch.hub.load(
+#     "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=True
+# )  # .autoshape()  # force_reload = recache latest code
 
 # Load Custom Model
-# model = torch.hub.load("ultralytics/yolov5", "custom",
-#                        path="./best.pt", force_reload=True)
+model = torch.hub.load("ultralytics/yolov5", "custom",
+                       path="model/dogbehavior_n.pt", force_reload=True)
 
 # Set Model Settings
 model.eval()
 model.conf = 0.6  # confidence threshold (0-1)
 model.iou = 0.45  # NMS IoU threshold (0-1)
+
+# 동영상
+cap = cv2.VideoCapture("video.mp4")
 
 # 강아지 iptime ipcam
 # cap = cv2.VideoCapture(
@@ -37,7 +40,7 @@ model.iou = 0.45  # NMS IoU threshold (0-1)
 #     "rtsp://brighten:brighten0701@192.168.0.44:554/stream_ch00_0")
 
 # webcam
-cap = cv2.VideoCapture(1)
+# cap = cv2.VideoCapture(1)
 
 # pi camera
 # 오류 발생 시 sudo service nvargus-daemon restart
@@ -95,14 +98,14 @@ def detect():
             ''' 학습한 이미지 사이즈 맞추기 '''
             results = model(img, size=640)
 
-            # results.print()  # print results to screen
+            results.print()  # print results to screen
 
-            lst = []
+            # lst = []
             df = results.pandas().xyxy[0]
             for i in df['name']:
                 update(i)
-                lst.append(i)
-            print(lst)
+                # lst.append(i)
+            # print(lst)
         else:  # reload when no frame
             cap = cap
             sleep(3)
@@ -119,7 +122,7 @@ def gen():
         # Encode BGR image to bytes so that cv2 will convert to RGB
         frame = cv2.imencode('.jpg', img_BGR)[1].tobytes()
         # print(frame)
-        sleep(0.03)
+        # sleep(0.03)
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
