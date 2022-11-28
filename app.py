@@ -29,11 +29,14 @@ model.conf = 0.6  # confidence threshold (0-1)
 model.iou = 0.45  # NMS IoU threshold (0-1)
 
 # 동영상
-cap = cv2.VideoCapture("video.mp4")
+# cap = cv2.VideoCapture("video.mp4")
 
 # 강아지 iptime ipcam
 # cap = cv2.VideoCapture(
-#     "rtsp://dogcam:blueberry19@errong.iptimecam.com:21040/stream_ch00_0")
+#    "rtsp://dogcam:blueberry19@errong.iptimecam.com:21040/stream_ch00_0")
+# 내부ip cam
+cap = cv2.VideoCapture(
+    "rtsp://dogcam:blueberry19@172.30.1.20:554/stream_ch00_0")
 
 # 브라이튼 iptime ipcam
 # cap = cv2.VideoCapture(
@@ -107,7 +110,8 @@ def detect():
                 # lst.append(i)
             # print(lst)
         else:  # reload when no frame
-            cap = cap
+            cap = cv2.VideoCapture(
+                "rtsp://dogcam:blueberry19@172.30.1.20:554/stream_ch00_0")
             sleep(3)
 
 
